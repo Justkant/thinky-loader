@@ -8,7 +8,8 @@
  */
 
 
-let _ = require('lodash');
+let mapValues = require('lodash.mapvalues');
+let each = require('lodash.foreach');
 let Thinky = require('thinky');
 let requireAll = require('require-all');
 
@@ -20,6 +21,10 @@ let loader = {
 
 loader.initialize = function(config, thinky)
 {
+    if (loader.thinky) {
+      return Promise.resolve(loader)
+    }
+
     loader.thinky = thinky || new Thinky(config.thinky.rethinkdb);
 
     return loader
@@ -45,9 +50,9 @@ loader.initialize = function(config, thinky)
                 caseSensitive: true
             });
 
-            definitions = _.mapValues(definitions, (d) => d.call(loader));
+            definitions = mapValues(definitions, (d) => d.call(loader));
 
-            _.each(definitions, function createModels(definition)
+            each(definitions, function createModels(definition)
             {
                 var modelId = definition.tableName || definition.globalId;
 
@@ -62,7 +67,7 @@ loader.initialize = function(config, thinky)
             });
 
             // call the init funciton on each def to set up relationships
-            _.each(definitions, function initModel(definition)
+            each(definitions, function initModel(definition)
             {
                 var modelId = definition.tableName || definition.globalId;
 
